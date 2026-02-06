@@ -30,6 +30,7 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
     _products: null,
     _menuBar: null,
     _logoContainer: null,
+    _titleLabel: null,
     // _modeToggle: null,  // Dark mode toggle (commented out temporarily)
 
     _init() {
@@ -52,21 +53,21 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
       logo.setHeight(40);
       logo.setScale(true);
 
-      // Company title
-      const title = new qx.ui.basic.Label("Digital Software Corporation");
-      title.setFont("bold");
-      title.setAlignY("middle");
+      // Company title (custom Basecoat label) - keep on one line, do not shrink
+      this._titleLabel = new landing_qooxdoo.ui.Label("Digital Software Corporation");
+      this._titleLabel.setFont("bold");
+      this._titleLabel.setAlignY("middle");
 
-      this._logoContainer.add(logo);
-      this._logoContainer.add(title);
+      this._logoContainer.add(logo, { flex: 0 });
+      this._logoContainer.add(this._titleLabel, { flex: 0 });
       mainContainer.add(this._logoContainer, { flex: 0 });
 
       // Spacer to push menu to the right
       const spacer = new qx.ui.core.Spacer();
       mainContainer.add(spacer, { flex: 1 });
 
-      // Menu bar for navigation
-      this._menuBar = new qx.ui.menubar.MenuBar();
+      // Menu bar for navigation (styled via landing_qooxdoo.ui.MenuBar)
+      this._menuBar = landing_qooxdoo.ui.MenuBar.createStyledMenuBar();
 
       // Browse Products menu
       const productsMenu = new qx.ui.menubar.Button("Browse Products");
@@ -109,7 +110,7 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
 
       this.add(mainContainer);
 
-      // Ensure navbar doesn't clip
+      // Ensure navbar doesn't clip - clear overflow on entire chain so company label is not cut
       this.addListenerOnce("appear", () => {
         // Sync dark mode toggle with current theme (commented out temporarily)
         // const app = qx.core.Init.getApplication();
@@ -129,6 +130,22 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
         const mainContentEl = mainContainer.getContentElement();
         if (mainContentEl) {
           mainContentEl.setStyle("overflow", "visible");
+          mainContentEl.setStyle("overflowX", "visible");
+          mainContentEl.setStyle("overflowY", "visible");
+        }
+        const logoContentEl = this._logoContainer.getContentElement();
+        if (logoContentEl) {
+          logoContentEl.setStyle("overflow", "visible");
+          logoContentEl.setStyle("overflowX", "visible");
+          logoContentEl.setStyle("overflowY", "visible");
+        }
+        if (this._titleLabel && this._titleLabel.getContentElement) {
+          const titleContentEl = this._titleLabel.getContentElement();
+          if (titleContentEl) {
+            titleContentEl.setStyle("overflow", "visible");
+            titleContentEl.setStyle("overflowX", "visible");
+            titleContentEl.setStyle("overflowY", "visible");
+          }
         }
       }, this);
     },

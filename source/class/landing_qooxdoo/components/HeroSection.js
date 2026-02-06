@@ -60,7 +60,7 @@ qx.Class.define("landing_qooxdoo.components.HeroSection", {
       this._descriptionLabel.setMaxWidth(800);
       this._descriptionLabel.setRich(true);
 
-      const viewMoreButton = new qx.ui.form.Button("VIEW MORE");
+      const viewMoreButton = new landing_qooxdoo.ui.Button("VIEW MORE");
       viewMoreButton.setAlignX("center");
       viewMoreButton.setWidth(130);
       viewMoreButton.addListener("execute", () => {

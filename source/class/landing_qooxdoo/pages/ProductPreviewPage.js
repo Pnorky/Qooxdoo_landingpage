@@ -112,7 +112,7 @@ qx.Class.define("landing_qooxdoo.pages.ProductPreviewPage", {
       this.add(downloadTitle);
 
       downloads.forEach(download => {
-        const downloadButton = new qx.ui.form.Button(`Download ${download.version || "File"}`);
+        const downloadButton = new landing_qooxdoo.ui.Button(`Download ${download.version || "File"}`);
         downloadButton.setPaddingBottom(10);
         downloadButton.addListener("execute", () => {
           if (download.link) {
@@ -133,7 +133,7 @@ qx.Class.define("landing_qooxdoo.pages.ProductPreviewPage", {
       this.add(brochureTitle);
 
       brochures.forEach(brochure => {
-        const brochureButton = new qx.ui.form.Button(brochure.title || "View Brochure");
+        const brochureButton = new landing_qooxdoo.ui.Button(brochure.title || "View Brochure");
         brochureButton.setPaddingBottom(10);
         brochureButton.addListener("execute", () => {
           if (brochure.link) {

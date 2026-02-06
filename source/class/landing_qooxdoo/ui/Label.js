@@ -1,3 +1,8 @@
+/**
+ * Custom Label – used globally (Navbar, Footer, Hero, Features, ProductPreview, etc.).
+ * Avoid changing default font size, line-height, or padding here; control spacing/layout
+ * in the parent components so one page doesn’t force others to zoom.
+ */
 qx.Class.define("landing_qooxdoo.ui.Label", {
   extend: qx.ui.core.Widget,
 
@@ -17,6 +22,12 @@ qx.Class.define("landing_qooxdoo.ui.Label", {
       check: ["left", "center", "right", "justify"],
       init: "left",
       apply: "_applyTextAlign"
+    },
+    /** When true, text wraps instead of staying on one line (avoids clipping in narrow columns). */
+    wrap: {
+      check: "Boolean",
+      init: false,
+      apply: "_applyWrap"
     }
   },
 
@@ -36,8 +47,8 @@ qx.Class.define("landing_qooxdoo.ui.Label", {
 
     // Create HTML for Basecoat label - let Basecoat handle styling
     this._html = new qx.ui.embed.Html(`
-      <div style="margin: 0; padding: 0; min-width: 0; flex-shrink: 0; display: inline-flex; align-items: center; height: 100%;">
-        <label class="label" style="min-width: 0; white-space: nowrap; display: inline-block;"></label>
+      <div style="margin: 0; padding: 0; min-width: min-content; flex-shrink: 0; display: inline-flex; align-items: center; height: 100%;">
+        <label class="label" style="min-width: min-content; white-space: nowrap; display: inline-block; overflow: visible;"></label>
       </div>
     `);
 
@@ -58,6 +69,23 @@ qx.Class.define("landing_qooxdoo.ui.Label", {
       // Apply font (handles null values)
       this._applyFont(this.getFont());
       this._applyTextAlign(this.getTextAlign());
+      // Prevent any overlapping theme/Basecoat CSS from clipping text
+      this._applyNoClipStyles();
+    });
+    // Ensure widget and all content elements allow full text (no overflow clip)
+    this.addListenerOnce("appear", () => {
+      const contentEl = this.getContentElement();
+      if (contentEl) {
+        contentEl.setStyle("overflow", "visible");
+        contentEl.setStyle("overflowX", "visible");
+        contentEl.setStyle("overflowY", "visible");
+      }
+      if (this._html && this._html.getContentElement()) {
+        this._html.getContentElement().setStyle("overflow", "visible");
+        this._html.getContentElement().setStyle("overflowX", "visible");
+        this._html.getContentElement().setStyle("overflowY", "visible");
+      }
+      this._applyNoClipStyles();
     });
   },
 
@@ -161,8 +189,66 @@ qx.Class.define("landing_qooxdoo.ui.Label", {
     _applyTextAlign(align) {
       const label = this._getLabelElement();
       if (label) {
-        label.style.textAlign = align || "left";
+        const a = align || "left";
+        label.style.textAlign = a;
+        // For center/right/justify, label must take full width or text won't actually align
+        const needsFullWidth = a === "center" || a === "right" || a === "justify";
+        label.style.width = needsFullWidth ? "100%" : "";
+        label.style.display = needsFullWidth ? "block" : "inline-block";
+        const wrapper = label.parentElement;
+        if (wrapper) {
+          wrapper.style.width = needsFullWidth ? "100%" : "";
+          wrapper.style.display = needsFullWidth ? "block" : "inline-flex";
+        }
       }
+    },
+
+    /**
+     * Override any overlapping CSS (theme/Basecoat) that could clip or truncate the label text
+     */
+    _applyNoClipStyles() {
+      const label = this._getLabelElement();
+      if (label) {
+        const wrap = this.getWrap();
+        label.style.overflow = "visible";
+        label.style.overflowX = "visible";
+        label.style.overflowY = "visible";
+        label.style.textOverflow = "clip";
+        label.style.whiteSpace = wrap ? "normal" : "nowrap";
+        if (wrap) {
+          label.style.wordBreak = "break-word";
+          label.style.minWidth = "0";
+          label.style.maxWidth = "100%";
+          label.style.flexShrink = "1";
+          label.style.display = "block";
+          const wrapper = label.parentElement;
+          if (wrapper) {
+            wrapper.style.minWidth = "0";
+            wrapper.style.flexShrink = "1";
+          }
+        } else {
+          label.style.maxWidth = "none";
+          label.style.minWidth = "min-content";
+          label.style.flexShrink = "0";
+          const wrapper = label.parentElement;
+          if (wrapper) {
+            wrapper.style.minWidth = "min-content";
+            wrapper.style.flexShrink = "0";
+          }
+        }
+      }
+    },
+
+    /**
+     * Apply wrap: when true, text wraps (white-space: normal) so it doesn't clip in narrow columns.
+     */
+    _applyWrap(wrap) {
+      const label = this._getLabelElement();
+      if (label) {
+        label.style.whiteSpace = wrap ? "normal" : "nowrap";
+        label.style.wordBreak = wrap ? "break-word" : "";
+      }
+      this._applyNoClipStyles();
     },
 
     /**

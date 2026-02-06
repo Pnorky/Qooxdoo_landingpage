@@ -19,19 +19,19 @@ qx.Class.define("landing_qooxdoo.components.FeaturesSection", {
 
   members: {
     _init() {
-      // Main content container - centered with max width
+      // Main content container - centered with max width (compact spacing to avoid zoom-out)
       const contentContainer = new qx.ui.container.Composite();
-      contentContainer.setLayout(new qx.ui.layout.VBox(40));
-      contentContainer.setPadding(60, 80);
+      contentContainer.setLayout(new qx.ui.layout.VBox(20));
+      contentContainer.setPadding(32, 40);
       contentContainer.setMaxWidth(1280);
       contentContainer.setAlignX("center");
-      contentContainer.setMinHeight(600);
+      contentContainer.setMinHeight(400);
 
       // Title section
       const titleContainer = new qx.ui.container.Composite();
-      titleContainer.setLayout(new qx.ui.layout.VBox(16));
+      titleContainer.setLayout(new qx.ui.layout.VBox(6));
       titleContainer.setAlignX("center");
-      titleContainer.setPaddingBottom(20);
+      titleContainer.setPaddingBottom(12);
 
       const title = new qx.ui.basic.Label("SIAS ONLINE (3.x)");
       title.setFont("bold");
@@ -111,9 +111,9 @@ qx.Class.define("landing_qooxdoo.components.FeaturesSection", {
      */
     _createFeatureCard(feature) {
       const card = new qx.ui.container.Composite();
-      card.setLayout(new qx.ui.layout.VBox(16));
-      card.setPadding(32);
-      card.setMinHeight(300);
+      card.setLayout(new qx.ui.layout.VBox(8));
+      card.setPadding(20);
+      card.setMinHeight(220);
 
       // Title
       const title = new qx.ui.basic.Label(feature.title);
@@ -126,13 +126,13 @@ qx.Class.define("landing_qooxdoo.components.FeaturesSection", {
       // Image container
       const imageContainer = new qx.ui.container.Composite();
       imageContainer.setLayout(new qx.ui.layout.Basic());
-      imageContainer.setMinHeight(200);
-      imageContainer.setMaxHeight(300);
+      imageContainer.setMinHeight(140);
+      imageContainer.setMaxHeight(220);
       
       const image = new qx.ui.basic.Image(feature.image);
       image.setScale(true);
-      image.setWidth(300);
-      image.setHeight(200);
+      image.setWidth(260);
+      image.setHeight(160);
       imageContainer.add(image);
 
       card.add(title);

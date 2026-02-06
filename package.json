@@ -16,6 +16,7 @@
     "@qooxdoo/framework": "^6.0.4"
   },
   "dependencies": {
+    "basecoat-css": "^0.3.11",
     "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   }
 }
