@@ -5,8 +5,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "compile": "qx compile",
-    "serve": "qx serve",
+    "build:tailwind": "npx @tailwindcss/cli -i ./tailwind-basecoat.css -o ./source/resource/landing_qooxdoo/compiled.css",
+    "compile": "npm run build:tailwind && qx compile",
+    "serve": "npm run build:tailwind && qx serve",
     "watch": "qx watch",
     "dev": "qx serve"
   },

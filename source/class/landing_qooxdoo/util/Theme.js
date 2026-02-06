@@ -13,39 +13,22 @@ qx.Class.define("landing_qooxdoo.util.Theme", {
 
   statics: {
     /**
-     * Color constants for pure qooxdoo styling
-     */
-    COLORS: {
-      background: "#ffffff",
-      foreground: "#333333",
-      card: "#ffffff",
-      "card-foreground": "#333333",
-      muted: "#f5f5f5",
-      "muted-foreground": "#666666",
-      border: "#e0e0e0",
-      primary: "#004580",
-      "primary-foreground": "#ffffff",
-      secondary: "#ffa500",
-      "secondary-foreground": "#ffffff"
-    },
-
-    /**
-     * Apply theme background color to a widget
+     * Apply theme background color to a widget (uses CSS variables from theme.css)
      * @param {qx.ui.core.Widget} widget - The widget to style
      * @param {String} variant - Theme variant: "background", "card", "muted", etc.
      */
     applyBackground(widget, variant = "background") {
-      const color = this.COLORS[variant] || this.COLORS.background;
+      const colorVar = `var(--${variant})`;
       const applyStyle = () => {
         const contentElement = widget.getContentElement();
         if (contentElement) {
           const element = contentElement.getDomElement();
           if (element) {
-            element.style.backgroundColor = color;
+            element.style.backgroundColor = colorVar;
           }
         }
       };
-      
+
       if (widget.isVisible()) {
         applyStyle();
       } else {
@@ -54,22 +37,22 @@ qx.Class.define("landing_qooxdoo.util.Theme", {
     },
 
     /**
-     * Apply theme text color to a widget
+     * Apply theme text color to a widget (uses CSS variables from theme.css)
      * @param {qx.ui.core.Widget} widget - The widget to style
      * @param {String} variant - Theme variant: "foreground", "muted-foreground", etc.
      */
     applyForeground(widget, variant = "foreground") {
-      const color = this.COLORS[variant] || this.COLORS.foreground;
+      const colorVar = `var(--${variant})`;
       const applyStyle = () => {
         const contentElement = widget.getContentElement();
         if (contentElement) {
           const element = contentElement.getDomElement();
           if (element) {
-            element.style.color = color;
+            element.style.color = colorVar;
           }
         }
       };
-      
+
       if (widget.isVisible()) {
         applyStyle();
       } else {
@@ -78,12 +61,47 @@ qx.Class.define("landing_qooxdoo.util.Theme", {
     },
 
     /**
-     * Get color value for a theme property
+     * Apply theme border color to a widget using decorator
+     * @param {qx.ui.core.Widget} widget - The widget to style
+     */
+    applyBorder(widget) {
+      const colorVar = "var(--border)";
+      try {
+        widget.setDecorator(new qx.ui.decoration.Decorator().set({
+          width: 1,
+          color: colorVar
+        }));
+      } catch (e) {
+        widget.addListenerOnce("appear", () => {
+          const domElement = widget.getContentElement();
+          if (domElement) {
+            const element = domElement.getDomElement();
+            if (element) {
+              element.style.borderColor = colorVar;
+              element.style.borderWidth = "1px";
+              element.style.borderStyle = "solid";
+            }
+          }
+        }, this);
+      }
+    },
+
+    /**
+     * Get CSS custom property value (for use in inline styles, e.g. rich labels)
+     * @param {String} propertyName - Name of the CSS variable (without --)
+     * @return {String} The CSS variable value, e.g. "var(--primary)"
+     */
+    getCSSVariable(propertyName) {
+      return `var(--${propertyName})`;
+    },
+
+    /**
+     * Get color value for a theme property (alias for getCSSVariable for compatibility)
      * @param {String} propertyName - Name of the theme property
-     * @return {String} The color value
+     * @return {String} The CSS variable reference
      */
     getColor(propertyName) {
-      return this.COLORS[propertyName] || this.COLORS.foreground;
+      return this.getCSSVariable(propertyName);
     },
 
     /**
@@ -101,18 +119,18 @@ qx.Class.define("landing_qooxdoo.util.Theme", {
 
       this.applyBackground(container, background);
       this.applyForeground(container, foreground);
-      
+
       if (border) {
         this.applyBorder(container);
       }
-      
+
       if (padding !== null) {
         container.setPadding(padding);
       }
     },
 
     /**
-     * Apply theme styles to DOM element directly
+     * Apply theme styles to DOM element directly (uses CSS variables)
      * @param {Element} element - DOM element to style
      * @param {Object} options - Styling options
      */
@@ -124,44 +142,26 @@ qx.Class.define("landing_qooxdoo.util.Theme", {
       } = options;
 
       if (background) {
-        element.style.backgroundColor = this.COLORS[background] || this.COLORS.background;
+        element.style.backgroundColor = `var(--${background})`;
       }
-      
+
       if (foreground) {
-        element.style.color = this.COLORS[foreground] || this.COLORS.foreground;
+        element.style.color = `var(--${foreground})`;
       }
-      
+
       if (border) {
-        element.style.borderColor = this.COLORS.border;
+        element.style.borderColor = "var(--border)";
         element.style.borderWidth = "1px";
         element.style.borderStyle = "solid";
       }
     },
 
     /**
-     * Apply theme border color to a widget using decorator
-     * @param {qx.ui.core.Widget} widget - The widget to style
+     * Check if dark mode is currently active
+     * @return {Boolean}
      */
-    applyBorder(widget) {
-      const borderColor = this.COLORS.border;
-      try {
-        widget.setDecorator(new qx.ui.decoration.Decorator().set({
-          width: 1,
-          color: borderColor
-        }));
-      } catch (e) {
-        widget.addListenerOnce("appear", () => {
-          const domElement = widget.getContentElement();
-          if (domElement) {
-            const element = domElement.getDomElement();
-            if (element) {
-              element.style.borderColor = borderColor;
-              element.style.borderWidth = "1px";
-              element.style.borderStyle = "solid";
-            }
-          }
-        }, this);
-      }
+    isDarkMode() {
+      return document.documentElement.classList.contains("dark");
     }
   }
 });

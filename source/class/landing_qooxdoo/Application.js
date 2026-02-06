@@ -34,6 +34,9 @@ qx.Class.define("landing_qooxdoo.Application",
       // Call super class
       this.base(arguments);
 
+      // Restore theme preference (light/dark) from localStorage
+      this._applySavedTheme();
+
       // Enable logging in debug variant
       if (qx.core.Environment.get("qx.debug"))
       {
@@ -178,11 +181,41 @@ qx.Class.define("landing_qooxdoo.Application",
     },
 
     /**
-     * Toggle dark mode theme (simplified - no longer using CSS classes)
+     * Apply saved theme (dark/light) from localStorage on startup
+     */
+    _applySavedTheme() {
+      try {
+        const saved = localStorage.getItem("landing_qooxdoo_theme");
+        if (saved === "dark") {
+          document.documentElement.classList.add("dark");
+        } else if (saved === "light") {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {
+        // Ignore if localStorage unavailable
+      }
+    },
+
+    /**
+     * Toggle dark mode theme (uses .dark class on documentElement, like qooxdo_proj)
+     * Persists preference to localStorage.
      */
     toggleTheme() {
-      // Dark mode toggle removed - using pure qooxdoo styling
-      // This can be reimplemented using qooxdoo theme system if needed
+      document.documentElement.classList.toggle("dark");
+      try {
+        const isDark = document.documentElement.classList.contains("dark");
+        localStorage.setItem("landing_qooxdoo_theme", isDark ? "dark" : "light");
+      } catch (e) {
+        // Ignore if localStorage unavailable
+      }
+    },
+
+    /**
+     * Return whether dark mode is currently active (for Navbar icon etc.)
+     * @return {Boolean}
+     */
+    isDarkMode() {
+      return document.documentElement.classList.contains("dark");
     }
   }
 });

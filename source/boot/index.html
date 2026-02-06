@@ -22,10 +22,23 @@
     }
   </style>
 
+  <!-- Basecoat CSS (load first) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.10/dist/basecoat.cdn.min.css"/>
+  <!-- TWCSS (load after basecoat so theme can override if needed) -->
+  <link rel="stylesheet" href="${resourcePath}landing_qooxdoo/compiled.css"/>
+
   <link rel="shortcut icon" type="image/png" href="${resourcePath}landing_qooxdoo/favicon.png"/>
   <link rel="mask-icon" href="${resourcePath}landing_qooxdoo/favicon.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.10/dist/js/all.min.js" defer></script>
+
+  <!-- Lucide Icons (production); for development use: https://unpkg.com/lucide@latest/dist/umd/lucide.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    html {
+      background-color: var(--background);
+      color: var(--foreground);
+    }
     body {
       padding: 0px;
       margin: 0px;
@@ -34,6 +47,14 @@
       position: fixed;
       -webkit-touch-callout: none !important;
       overflow: hidden;
+      background-color: var(--background);
+      color: var(--foreground);
+    }
+    /* Qooxdoo root: fill viewport so navbar gets full width and isn't cut off */
+    body > div {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
     }
   </style>
 
