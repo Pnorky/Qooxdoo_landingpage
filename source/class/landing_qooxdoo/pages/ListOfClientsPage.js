@@ -13,61 +13,67 @@ qx.Class.define("landing_qooxdoo.pages.ListOfClientsPage", {
 
   construct() {
     this.base(arguments);
-    this.setLayout(new qx.ui.layout.VBox(20));
-    this.setPadding(40, 60);
-    this.setMaxWidth(1200);
-    this.setAlignX("center");
+    this.setLayout(new qx.ui.layout.VBox(16));
+    this.setPadding(24, 24);
+    this.setAllowGrowX(true);
+    this.setAllowGrowY(true);
     this._init();
   },
 
   members: {
     _init() {
-      // Title
-      const title = new qx.ui.basic.Label("List of Clients");
+      // Title – custom Label, larger size
+      const title = new landing_qooxdoo.ui.Label("List of Clients");
       title.setFont("bold");
+      title.addListenerOnce("appear", () => {
+        const root = title.getContentElement() && title.getContentElement().getDomElement();
+        if (root) {
+          const labelEl = root.querySelector(".label");
+          if (labelEl) {
+            labelEl.style.fontSize = "1.75rem";
+            labelEl.style.lineHeight = "1.2";
+          }
+        }
+      });
       this.add(title);
 
-      // Table container
+      // Table container – full width
       const tableContainer = new qx.ui.container.Composite();
       tableContainer.setLayout(new qx.ui.layout.VBox());
+      tableContainer.setAllowGrowX(true);
       this._tableContainer = tableContainer;
       this.add(tableContainer, { flex: 1 });
 
-      // Load clients
       this._loadClients();
     },
 
     /**
-     * Load clients from Excel
+     * Load clients from Excel and show in custom Table
      */
     _loadClients() {
       landing_qooxdoo.util.ExcelReader.getListOfClients()
         .then(clients => {
-          if (clients.length === 0) {
+          if (!clients || clients.length === 0) {
             const noDataLabel = new qx.ui.basic.Label("No clients found");
             this._tableContainer.add(noDataLabel);
             return;
           }
 
-          // Create table
-          const table = new qx.ui.table.Table();
-          const tableModel = new qx.ui.table.model.Simple();
-          
-          // Get column names from first client
           const firstClient = clients[0];
           const columns = Object.keys(firstClient);
-          
-          tableModel.setColumns(columns, columns);
-          
-          // Add data rows
-          const data = clients.map(client => {
-            return columns.map(col => client[col] || "");
+
+          const table = new landing_qooxdoo.ui.Table("");
+          table.setAllowGrowX(true);
+          table.setAllowGrowY(true);
+          table.setMinHeight(200);
+
+          table.setHeaders(columns);
+
+          clients.forEach(client => {
+            const rowData = columns.map(col => client[col] != null ? String(client[col]) : "");
+            table.addRow(rowData, null, client);
           });
-          tableModel.setData(data);
-          
-          table.setTableModel(tableModel);
-          table.setColumnWidth(0, 200);
-          
+
           this._tableContainer.add(table, { flex: 1 });
         })
         .catch(error => {

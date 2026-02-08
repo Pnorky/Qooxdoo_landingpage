@@ -22,9 +22,7 @@
     }
   </style>
 
-  <!-- Basecoat CSS (load first) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.10/dist/basecoat.cdn.min.css"/>
-  <!-- TWCSS (load after basecoat so theme can override if needed) -->
+  <!-- Single stylesheet: Tailwind + Basecoat + theme (theme.css). Run "npm run build:tailwind" after changing theme or Tailwind/Basecoat. -->
   <link rel="stylesheet" href="${resourcePath}landing_qooxdoo/compiled.css"/>
 
   <link rel="shortcut icon" type="image/png" href="${resourcePath}landing_qooxdoo/favicon.png"/>

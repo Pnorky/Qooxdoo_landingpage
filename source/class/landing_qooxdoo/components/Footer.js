@@ -19,6 +19,7 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
   construct() {
     this.base(arguments);
     this.setLayout(new qx.ui.layout.VBox());
+    this.setMinHeight(260);
     this._products = [];
     this._init();
     // Apply footer line-height after DOM ready (and after loadProducts() re-init)
@@ -29,205 +30,188 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
     _products: null,
 
     _init() {
-      const columnGap = 80;
-      const footerContainer = new qx.ui.container.Composite();
-      footerContainer.setLayout(new qx.ui.layout.HBox(0));
-      footerContainer.setPadding(8, 8);
-      footerContainer.setMinWidth(1280);
-      footerContainer.setMaxWidth(1280);
-      footerContainer.setAlignX("center");
+      // Footer = canvas (this). Two components: columns (top), copyright (bottom).
+      this.setLayout(new qx.ui.layout.VBox(0));
+      this.setAllowGrowX(true);
 
-      const productsWidth = 180;
-      const othersWidth = 120;
-      const contactWidth = 420;
-
-      // PRODUCTS stays on the left
-      const productsColumn = this._createColumn("PRODUCTS", () => {
-        return this._products.map(product => ({
-          label: product.code,
-          href: product.href
-        }));
+      // —— Component 1: 3 columns (top of footer) ——
+      const columnsBlock = new qx.ui.container.Composite();
+      columnsBlock.setLayout(new qx.ui.layout.VBox(0));
+      columnsBlock.setAllowGrowX(true);
+      columnsBlock.addListenerOnce("appear", () => {
+        const el = columnsBlock.getContentElement();
+        if (el && el.getDomElement()) {
+          const dom = el.getDomElement();
+          dom.classList.add("footer-card-section", "footer-columns-block");
+          dom.style.overflow = "visible";
+          dom.style.width = "100%";
+        }
       });
-      productsColumn.setWidth(productsWidth);
-      productsColumn.setAllowShrinkX(false);
-      footerContainer.add(productsColumn, { flex: 0 });
 
-      const othersColumn = this._createColumn("OTHERS", () => {
-        return [
-          { label: "List of clients", href: "/list-of-clients" },
-          { label: "Release Notes", href: "/release-notes" }
-        ];
-      }, { center: true, width: othersWidth });
-      othersColumn.setMarginLeft(columnGap);
-      othersColumn.setWidth(othersWidth);
-      othersColumn.setAllowShrinkX(false);
+      const columnsHtml = this._buildColumnsHtml();
+      const columnsHtmlWidget = new qx.ui.embed.Html(columnsHtml);
+      columnsHtmlWidget.setAllowGrowX(true);
+      columnsHtmlWidget.addListenerOnce("appear", () => {
+        const blockEl = columnsBlock.getContentElement();
+        const sectionDom = blockEl && blockEl.getDomElement();
+        if (sectionDom && !sectionDom._footerClickBound) {
+          sectionDom._footerClickBound = true;
+          sectionDom.addEventListener("click", (e) => {
+            const a = e.target.closest("a[data-href]");
+            if (a) {
+              e.preventDefault();
+              this.fireDataEvent("navigate", { path: a.getAttribute("data-href") });
+            }
+          }, true);
+        }
+        const htmlEl = columnsHtmlWidget.getContentElement && columnsHtmlWidget.getContentElement();
+        if (htmlEl && htmlEl.getDomElement) {
+          const d = htmlEl.getDomElement();
+          if (d) {
+            d.style.overflow = "visible";
+            d.style.minHeight = "0";
+          }
+        }
+      });
+      columnsBlock.add(columnsHtmlWidget);
 
-      // Center OTHERS only: [PRODUCTS] [spacer] [OTHERS] [spacer] [More information]
-      footerContainer.add(new qx.ui.core.Spacer(), { flex: 1 });
-      footerContainer.add(othersColumn, { flex: 0 });
-      footerContainer.add(new qx.ui.core.Spacer(), { flex: 1 });
+      // —— Component 2: copyright (bottom of footer) ——
+      const copyrightBlock = new qx.ui.container.Composite();
+      copyrightBlock.setLayout(new qx.ui.layout.VBox(0));
+      copyrightBlock.setAllowGrowX(true);
+      copyrightBlock.addListenerOnce("appear", () => {
+        const el = copyrightBlock.getContentElement();
+        if (el && el.getDomElement()) {
+          const dom = el.getDomElement();
+          dom.classList.add("footer-copyright-block");
+          dom.style.overflow = "visible";
+          dom.style.width = "100%";
+        }
+      });
 
-      const contactColumn = this._createContactColumn();
-      contactColumn.setMarginLeft(columnGap);
-      contactColumn.setWidth(contactWidth);
-      contactColumn.setAllowShrinkX(false);
-      footerContainer.add(contactColumn, { flex: 0 });
-
-      // Wrapper to center footer content
-      const footerWrapper = new qx.ui.container.Composite();
-      footerWrapper.setLayout(new qx.ui.layout.VBox());
-      footerWrapper.add(footerContainer);
-
-      this.add(footerWrapper);
-
-      // Copyright section - match React: pb-2 (8px), tight gap between lines (~4–6px)
       const copyrightRow = new qx.ui.container.Composite();
       copyrightRow.setLayout(new qx.ui.layout.HBox());
-      copyrightRow.setMarginTop(16);
+      copyrightRow.setMarginTop(80);
       copyrightRow.setPadding(0, 0);
-
+      copyrightRow.setAllowGrowX(true);
+      copyrightRow.addListenerOnce("appear", () => {
+        const el = copyrightRow.getContentElement();
+        if (el && el.getDomElement()) el.getDomElement().classList.add("footer-copyright-row");
+      });
       const copyrightSpacerLeft = new qx.ui.core.Spacer();
       const copyrightSpacerRight = new qx.ui.core.Spacer();
-
       const copyrightWidth = 380;
-      const copyrightContainer = new qx.ui.container.Composite();
-      copyrightContainer.setLayout(new qx.ui.layout.VBox(8));
-      copyrightContainer.setPadding(0, 0, 8, 0);
-      copyrightContainer.setMinWidth(copyrightWidth);
-      copyrightContainer.setAllowShrinkX(false);
-      const copyright1 = new landing_qooxdoo.ui.Label("All Rights Reserved 2003-2026");
-      copyright1.setWidth(copyrightWidth);
-      copyright1.setAlignX("center");
-      copyright1.setTextAlign("center");
-      copyright1.setMaxHeight(18);
-      const copyright2 = new landing_qooxdoo.ui.Label("Digital Software Corporation © 2003-2026");
-      copyright2.setWidth(copyrightWidth);
-      copyright2.setAlignX("center");
-      copyright2.setTextAlign("center");
-      copyright2.setMaxHeight(18);
-      const copyright3 = new landing_qooxdoo.ui.Label("Designed by Okonut & Friends");
-      copyright3.setWidth(copyrightWidth);
-      copyright3.setAlignX("center");
-      copyright3.setTextAlign("center");
-      copyright3.setMaxHeight(18);
-
-      copyrightContainer.add(copyright1);
-      copyrightContainer.add(copyright2);
-      copyrightContainer.add(copyright3);
-
+      const copyrightHtml = this._buildCopyrightHtml();
+      const copyrightHtmlWidget = new qx.ui.embed.Html(copyrightHtml);
+      copyrightHtmlWidget.setMinWidth(copyrightWidth);
+      copyrightHtmlWidget.setAllowShrinkX(false);
       copyrightRow.add(copyrightSpacerLeft, { flex: 1 });
-      copyrightRow.add(copyrightContainer, { flex: 0 });
+      copyrightRow.add(copyrightHtmlWidget, { flex: 0 });
       copyrightRow.add(copyrightSpacerRight, { flex: 1 });
+      copyrightBlock.add(copyrightRow);
 
-      this.add(copyrightRow);
-    },
+      // Canvas: add the two components (columns on top, copyright on bottom)
+      this.add(columnsBlock, { flex: 0 });
+      this.add(copyrightBlock, { flex: 0 });
 
-    /**
-     * Create a column with title and items.
-     * Uses uniform 8px spacing: header-to-first-item and between all items.
-     * @param {Object} [opts] - Optional: { center: true, width: number } to center text in the column.
-     */
-    _createColumn(title, getItems, opts = {}) {
-      const column = new qx.ui.container.Composite();
-      column.setLayout(new qx.ui.layout.VBox(8));
-
-      const center = opts.center && opts.width;
-      const colWidth = opts.width;
-
-      const titleLabel = new landing_qooxdoo.ui.Label(title);
-      titleLabel.setFont("bold");
-      titleLabel.setPaddingBottom(0);
-      titleLabel.setMarginBottom(0);
-      titleLabel.setMaxHeight(18);
-      if (center) {
-        titleLabel.setWidth(colWidth);
-        titleLabel.setTextAlign("center");
-      }
-      column.add(titleLabel);
-
-      const items = getItems();
-      items.forEach(item => {
-        const itemLabel = new landing_qooxdoo.ui.Label(item.label);
-        itemLabel.setPaddingBottom(0);
-        itemLabel.setMarginBottom(0);
-        itemLabel.setMaxHeight(18);
-        if (center) {
-          itemLabel.setWidth(colWidth);
-          itemLabel.setTextAlign("center");
+      const applyFooterStyles = () => {
+        const contentEl = this.getContentElement();
+        if (contentEl) {
+          const dom = contentEl.getDomElement();
+          if (dom) {
+            dom.classList.add("footer-card");
+            dom.style.border = "none";
+            dom.style.width = "100%";
+            dom.style.overflow = "visible";
+            dom.style.minHeight = "280px";
+            dom.style.display = "flex";
+            dom.style.flexDirection = "column";
+          }
         }
-        itemLabel.addListener("tap", () => {
-          this.fireDataEvent("navigate", { path: item.href });
-        }, this);
-        column.add(itemLabel);
-      });
+        const columnsBlockEl = columnsBlock.getContentElement();
+        if (columnsBlockEl) {
+          const d = columnsBlockEl.getDomElement();
+          if (d) {
+            d.classList.add("footer-card-section", "footer-columns-block");
+            d.style.padding = "12px 8px 40px 0";
+            d.style.display = "flex";
+            d.style.flexDirection = "column";
+            d.style.alignItems = "stretch";
+            d.style.minHeight = "0";
+            d.style.overflow = "visible";
+            d.style.width = "100%";
+          }
+        }
+        const copyrightBlockEl = copyrightBlock.getContentElement();
+        if (copyrightBlockEl) {
+          const d = copyrightBlockEl.getDomElement();
+          if (d) {
+            d.classList.add("footer-copyright-block");
+            d.style.padding = "80px 8px 16px";
+            d.style.minHeight = "72px";
+            d.style.display = "flex";
+            d.style.flexDirection = "column";
+            d.style.alignItems = "center";
+            d.style.gap = "0";
+            d.style.overflow = "visible";
+            d.style.width = "100%";
+          }
+        }
+      };
 
-      return column;
+      this.addListenerOnce("appear", applyFooterStyles);
+      setTimeout(applyFooterStyles, 100);
+      setTimeout(applyFooterStyles, 400);
     },
 
-    /**
-     * Create contact information column.
-     * Uses same 8px spacing as other columns for consistency.
-     */
-    _createContactColumn() {
-      const column = new qx.ui.container.Composite();
-      column.setLayout(new qx.ui.layout.VBox(8));
+    _escapeHtml(str) {
+      if (!str) return "";
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    },
 
-      const titleLabel = new landing_qooxdoo.ui.Label("FOR MORE INFORMATION CONTACT");
-      titleLabel.setFont("bold");
-      titleLabel.setPaddingBottom(0);
-      titleLabel.setMarginBottom(0);
-      titleLabel.setMaxHeight(18);
+    _buildCopyrightHtml() {
+      const lineStyle = "color:#fff;font-size:13px;line-height:1;margin:0;padding:0;text-align:center;display:block";
+      const esc = s => this._escapeHtml(s);
+      return "<div class=\"footer-copyright-text\" style=\"line-height:1;margin:0;padding:0;text-align:center;color:#fff;font-size:13px;\">" +
+        "<div style=\"" + lineStyle + "\">" + esc("All Rights Reserved 2003-2026") + "</div>" +
+        "<div style=\"" + lineStyle + "\">" + esc("Digital Software Corporation © 2003-2026") + "</div>" +
+        "<div style=\"" + lineStyle + "\">" + esc("Designed by Okonut & Friends") + "</div>" +
+        "</div>";
+    },
 
-      column.add(titleLabel);
-
-      const nameLabel = new landing_qooxdoo.ui.Label("THOMAS C. SADDUL");
-      nameLabel.setFont("bold");
-      nameLabel.setMarginTop(0);
-      nameLabel.setMarginBottom(0);
-      nameLabel.setMaxHeight(18);
-
-      column.add(nameLabel);
-
-      const titleLabel2 = new landing_qooxdoo.ui.Label("President / CEO / Chief Architect");
-      titleLabel2.setMarginTop(0);
-      titleLabel2.setMarginBottom(0);
-      titleLabel2.setMaxHeight(18);
-
-      column.add(titleLabel2);
-
-      // Contact info items - 8px gap from VBox for consistent spacing
-      const contactItems = [
-        { icon: "✉", text: "digisoftphofficial@gmail.com" },
-        { icon: "📞", text: "Globe: 09278591168 | Smart: 09214524212" },
-        { icon: "📍", text: "Paranaque City, Philippines" },
-        { icon: "📘", text: "DigiSoftPH", link: "https://www.facebook.com/DigiSoftPH/" }
+    _buildColumnsHtml() {
+      const esc = s => this._escapeHtml(s);
+      const rowStyle = "display:flex;flex-direction:row;justify-content:space-between;gap:80px;width:880px;max-width:100%;margin:0 auto;padding:0 8px;box-sizing:border-box;overflow:visible;min-height:0";
+      const titleStyle = "color:#FFA500;font-weight:bold;font-size:13px;margin:0 0 4px 0;padding:0";
+      const itemStyle = "color:#fff;font-size:13px;line-height:1.3;margin:0 0 2px 0;padding:0;text-decoration:none;display:block";
+      const linkStyle = itemStyle + ";cursor:pointer";
+      const lineStyle = "color:#fff;font-size:13px;line-height:1.3;margin:0 0 2px 0;padding:0";
+      let productsHtml = "<div style=\"" + titleStyle + "\">PRODUCTS</div>";
+      (this._products || []).forEach(p => {
+        productsHtml += "<a href=\"#\" data-href=\"" + esc(p.href || "") + "\" style=\"" + linkStyle + "\">" + esc(p.code || "") + "</a>";
+      });
+      const othersItems = [
+        { label: "List of clients", href: "/list-of-clients" },
+        { label: "Release Notes", href: "/release-notes" }
       ];
-
-      contactItems.forEach((item) => {
-        const contactItem = new qx.ui.container.Composite();
-        contactItem.setLayout(new qx.ui.layout.HBox(8));
-        contactItem.setMarginBottom(0);
-        contactItem.setPadding(0);
-
-        const iconLabel = new landing_qooxdoo.ui.Label(item.icon);
-        iconLabel.setWidth(14);
-        iconLabel.setHeight(14);
-        iconLabel.setMaxHeight(18);
-
-        const textLabel = new landing_qooxdoo.ui.Label(item.text);
-        textLabel.setMaxHeight(18);
-        if (item.link) {
-          textLabel.addListener("tap", () => {
-            window.open(item.link, "_blank");
-          }, this);
-        }
-
-        contactItem.add(iconLabel);
-        contactItem.add(textLabel, { flex: 1 });
-        column.add(contactItem);
+      let othersHtml = "<div style=\"" + titleStyle + "\">OTHERS</div>";
+      othersItems.forEach(o => {
+        othersHtml += "<a href=\"#\" data-href=\"" + esc(o.href) + "\" style=\"" + linkStyle + "\">" + esc(o.label) + "</a>";
       });
-
-      return column;
+      let contactHtml = "<div style=\"" + titleStyle + "\">FOR MORE INFORMATION CONTACT</div>";
+      contactHtml += "<div style=\"" + lineStyle + ";font-weight:bold\">THOMAS C. SADDUL</div>";
+      contactHtml += "<div style=\"" + lineStyle + "\">President / CEO / Chief Architect</div>";
+      contactHtml += "<div style=\"" + lineStyle + "\">✉ digisoftphofficial@gmail.com</div>";
+      contactHtml += "<div style=\"" + lineStyle + "\">📞 Globe: 09278591168 | Smart: 09214524212</div>";
+      contactHtml += "<div style=\"" + lineStyle + "\">📍 Paranaque City, Philippines</div>";
+      contactHtml += "<a href=\"https://www.facebook.com/DigiSoftPH/\" target=\"_blank\" rel=\"noopener\" style=\"" + linkStyle + "\">📘 DigiSoftPH</a>";
+      return "<div class=\"footer-columns-html-row\" style=\"" + rowStyle + "\">" +
+        "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0\">" + productsHtml + "</div>" +
+        "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0\">" + othersHtml + "</div>" +
+        "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0;max-width:420px\">" + contactHtml + "</div>" +
+        "</div>";
     },
 
     /**
@@ -235,13 +219,18 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
      */
     loadProducts() {
       landing_qooxdoo.util.ExcelReader.getAllProducts().then(products => {
-        this._products = products;
+        this._products = products || [];
         this.removeAll();
-        this._init();
-        // Re-apply compact styles after rebuild so new labels inherit tight line-height
-        this._applyCompactFooterStyles();
+        try {
+          this._init();
+          this._applyCompactFooterStyles();
+        } catch (e) {
+          console.error("Footer _init failed:", e);
+          this._init();
+        }
       }).catch(error => {
         console.error("Failed to load products:", error);
+        this._products = [];
       });
     },
 
@@ -253,8 +242,7 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
       if (!contentEl) return;
       const dom = contentEl.getDomElement();
       if (!dom) return;
-      dom.style.lineHeight = "1.15";
-      dom.style.fontSize = "12px";
+      dom.style.lineHeight = "1.2";
     }
   }
 });

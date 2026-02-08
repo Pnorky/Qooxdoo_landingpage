@@ -27,16 +27,11 @@ qx.Class.define("landing_qooxdoo.ui.MenuBar",
         const menubar = new qx.ui.menubar.MenuBar();
         menubar.setAllowGrowX(true);
         menubar.addListenerOnce("appear", () => {
-          const domElement = menubar.getContentElement();
-          if (domElement) {
-            const element = domElement.getDomElement();
-            if (element) {
-              landing_qooxdoo.util.Theme.styleDOMElement(element, {
-                background: "background",
-                foreground: "foreground",
-                border: false
-              });
-              element.style.borderBottom = "1px solid var(--border)";
+          const contentEl = menubar.getContentElement();
+          if (contentEl) {
+            const dom = contentEl.getDomElement();
+            if (dom) {
+              dom.classList.add("menubar-theme");
             }
           }
         }, menubar);

@@ -20,8 +20,10 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
     this.base(arguments);
     this.setMinHeight(64);
     this.setPaddingBottom(12);
-    this.setPaddingRight(40);
+    this.setPadding(0);
+    this.setPaddingBottom(12);
     this.setLayout(new qx.ui.layout.VBox());
+    this.setAllowStretchX(true);
     this._products = [];
     this._init();
   },
@@ -34,7 +36,11 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
     // _modeToggle: null,  // Dark mode toggle (commented out temporarily)
 
     _init() {
-      // Main container - full width, horizontal layout
+      // Card wrapper (theme from theme.css: --card, --card-foreground, --border, etc.)
+      const card = new landing_qooxdoo.ui.Card("", "", false);
+      card.setFullWidth(true);
+
+      // Main container - full width, horizontal layout (lives inside card section)
       const mainContainer = new qx.ui.container.Composite();
       mainContainer.setLayout(new qx.ui.layout.HBox(20));
       mainContainer.setPadding(16, 40, 20, 24);
@@ -57,6 +63,8 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
       this._titleLabel = new landing_qooxdoo.ui.Label("Digital Software Corporation");
       this._titleLabel.setFont("bold");
       this._titleLabel.setAlignY("middle");
+      // Nudge text up so it aligns with the visual center of the circular logo
+      this._titleLabel.setMarginTop(-4);
 
       this._logoContainer.add(logo, { flex: 0 });
       this._logoContainer.add(this._titleLabel, { flex: 0 });
@@ -108,7 +116,8 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
       // }, this);
       // mainContainer.add(this._modeToggle, { flex: 0 });
 
-      this.add(mainContainer);
+      card.getSection().add(mainContainer);
+      this.add(card);
 
       // Ensure navbar doesn't clip - clear overflow on entire chain so company label is not cut
       this.addListenerOnce("appear", () => {
@@ -123,8 +132,20 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
           contentEl.setStyle("overflowY", "visible");
           const navDom = contentEl.getDomElement();
           if (navDom) {
-            navDom.style.paddingRight = "24px";
             navDom.style.boxSizing = "border-box";
+            navDom.style.width = "100%";
+          }
+        }
+        const cardContentEl = card.getContentElement();
+        if (cardContentEl) {
+          cardContentEl.setStyle("overflow", "visible");
+          cardContentEl.setStyle("overflowX", "visible");
+          cardContentEl.setStyle("overflowY", "visible");
+          cardContentEl.setStyle("borderRadius", 0);
+          const cardDom = cardContentEl.getDomElement();
+          if (cardDom) {
+            cardDom.classList.add("navbar-card");
+            cardDom.style.borderRadius = "0";
           }
         }
         const mainContentEl = mainContainer.getContentElement();

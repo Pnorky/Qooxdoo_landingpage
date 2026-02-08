@@ -69,12 +69,12 @@ qx.Class.define("landing_qooxdoo.Application",
         this._pageContent = pageContent;
         mainContainer.add(this._pageContainer, { flex: 1 });
 
-        // Page slot (first) - current page goes here
+        // Page slot (first) - grows to fill space so footer stays at bottom of viewport
         this._pageSlot = new qx.ui.container.Composite();
         this._pageSlot.setLayout(new qx.ui.layout.VBox());
-        this._pageContent.add(this._pageSlot);
+        this._pageContent.add(this._pageSlot, { flex: 1 });
 
-        // Footer (second) - always at bottom of scroll content
+        // Footer (second) - always at bottom of scroll content; minHeight set in Footer so it never gets clipped
         this._footer = new landing_qooxdoo.components.Footer();
         this._footer.loadProducts();
         this._footer.addListener("navigate", (e) => {
@@ -159,7 +159,7 @@ qx.Class.define("landing_qooxdoo.Application",
 
         if (newPage) {
           this._currentPage = newPage;
-          this._pageSlot.add(newPage);
+          this._pageSlot.add(newPage, { flex: 1 });
           // Reset scroll position to top when navigating to a new page
           // Use setTimeout to ensure the page is rendered first
           setTimeout(() => {

@@ -34,7 +34,7 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
     // Create HTML with Basecoat table class
     this._html = new qx.ui.embed.Html(`
       <div class="overflow-x-auto" style="width: 100%; height: 100%;">
-        <table class="table" id="${this._tableId}" style="border: 1px solid rgba(0, 0, 0, 0.15); border-collapse: collapse;">
+        <table class="table" id="${this._tableId}" style="border: 1px solid var(--border); border-collapse: collapse;">
           <caption></caption>
           <thead></thead>
           <tbody></tbody>
@@ -57,7 +57,7 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
 
       // Ensure table has visible border and auto layout for automatic column width adjustment
       if (this._tableElement) {
-        this._tableElement.style.border = "1px solid rgba(0, 0, 0, 0.15)";
+        this._tableElement.style.border = "1px solid var(--border)";
         this._tableElement.style.borderCollapse = "collapse";
         // Use auto layout to allow columns to adjust based on content
         this._tableElement.style.tableLayout = "auto";
@@ -273,7 +273,7 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
         this._theadElement.innerHTML = "";
         const headerRow = document.createElement("tr");
         // Ensure header row has visible border and proper height
-        headerRow.style.borderBottom = "1px solid rgba(0, 0, 0, 0.1)";
+        headerRow.style.borderBottom = "1px solid var(--border)";
         headerRow.style.minHeight = "44px"; // Consistent header height
         headerRow.style.height = "auto"; // Allow height to adjust
         this._headers.forEach((headerText, index) => {
@@ -291,8 +291,8 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
           }
           
           // Add cell borders
-          th.style.borderRight = "1px solid rgba(0, 0, 0, 0.1)";
-          th.style.borderBottom = "1px solid rgba(0, 0, 0, 0.1)";
+          th.style.borderRight = "1px solid var(--border)";
+          th.style.borderBottom = "1px solid var(--border)";
           th.style.position = "relative";
           
           // Set content directly
@@ -327,13 +327,13 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
             // Add hover effect - highlight the border
             resizeHandle.addEventListener("mouseenter", () => {
               if (!this._isResizing) {
-                th.style.borderRight = "2px solid rgba(0, 0, 0, 0.3)";
-                resizeHandle.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+                th.style.borderRight = "2px solid var(--border)";
+                resizeHandle.style.backgroundColor = "var(--muted)";
               }
             });
             resizeHandle.addEventListener("mouseleave", () => {
               if (!this._isResizing) {
-                th.style.borderRight = "1px solid rgba(0, 0, 0, 0.1)";
+                th.style.borderRight = "1px solid var(--border)";
                 resizeHandle.style.backgroundColor = "transparent";
               }
             });
@@ -368,7 +368,7 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
           // Add hover effect for clickable rows
           tr.style.cursor = "pointer";
           tr.addEventListener("mouseenter", () => {
-            tr.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+            tr.style.backgroundColor = "var(--muted)";
           });
           tr.addEventListener("mouseleave", () => {
             tr.style.backgroundColor = "";
@@ -390,8 +390,8 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
             }
             
             // Add cell borders
-            td.style.borderRight = "1px solid rgba(0, 0, 0, 0.1)";
-            td.style.borderBottom = "1px solid rgba(0, 0, 0, 0.1)";
+            td.style.borderRight = "1px solid var(--border)";
+            td.style.borderBottom = "1px solid var(--border)";
             // Remove right border from last cell
             if (index === row.cells.length - 1) {
               td.style.borderRight = "none";
@@ -465,8 +465,8 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
             }
             
             // Add cell borders
-            td.style.borderRight = "1px solid rgba(0, 0, 0, 0.1)";
-            td.style.borderBottom = "1px solid rgba(0, 0, 0, 0.1)";
+            td.style.borderRight = "1px solid var(--border)";
+            td.style.borderBottom = "1px solid var(--border)";
             // Remove right border from last cell (unless it has colspan)
             if (index === row.cells.length - 1 && (!cell.colspan || cell.colspan === 1)) {
               td.style.borderRight = "none";
@@ -575,8 +575,8 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
         this._resizeStartWidth = th.offsetWidth;
 
         // Add visual feedback - highlight border during resize
-        th.style.borderRight = "2px solid rgba(0, 0, 0, 0.4)";
-        handle.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+        th.style.borderRight = "2px solid var(--border)";
+        handle.style.backgroundColor = "var(--muted)";
         document.body.style.cursor = "col-resize";
         document.body.style.userSelect = "none";
 
@@ -604,7 +604,7 @@ qx.Class.define("landing_qooxdoo.ui.Table", {
 
           // Remove visual feedback - restore normal border
           if (th) {
-            th.style.borderRight = "1px solid rgba(0, 0, 0, 0.1)";
+            th.style.borderRight = "1px solid var(--border)";
           }
           if (handle) {
             handle.style.backgroundColor = "transparent";
