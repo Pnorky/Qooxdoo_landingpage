@@ -52,25 +52,66 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
       const columnsHtmlWidget = new qx.ui.embed.Html(columnsHtml);
       columnsHtmlWidget.setAllowGrowX(true);
       columnsHtmlWidget.addListenerOnce("appear", () => {
+        const self = this;
+        const handleFooterClick = (e) => {
+          const a = e.target.closest("a");
+          if (!a) return;
+          const dataHref = a.getAttribute("data-href");
+          if (dataHref) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.fireDataEvent("navigate", { path: dataHref });
+            return;
+          }
+          if (a.getAttribute("href") && a.getAttribute("href") !== "#") return;
+          e.preventDefault();
+        };
+        const bindInDocument = (doc) => {
+          if (!doc || doc._footerLinksBound) return;
+          doc._footerLinksBound = true;
+          doc.addEventListener("click", handleFooterClick, true);
+          try {
+            const root = doc.body || doc.documentElement;
+            if (root && root.querySelectorAll) {
+              root.querySelectorAll("a[data-href]").forEach(link => {
+                link.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const path = link.getAttribute("data-href");
+                  if (path) self.fireDataEvent("navigate", { path });
+                }, true);
+              });
+            }
+          } catch (err) {}
+        };
+        const htmlEl = columnsHtmlWidget.getContentElement && columnsHtmlWidget.getContentElement();
+        const root = htmlEl && htmlEl.getDomElement && htmlEl.getDomElement();
+        if (root) {
+          root.style.overflow = "visible";
+          root.style.minHeight = "0";
+          bindInDocument(root.ownerDocument);
+          const iframe = root.querySelector && root.querySelector("iframe");
+          if (iframe) {
+            const onIframeReady = () => {
+              try {
+                const idoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+                if (idoc && idoc.body) bindInDocument(idoc);
+              } catch (err) {}
+            };
+            if (iframe.contentDocument && iframe.contentDocument.body) {
+              onIframeReady();
+            } else {
+              iframe.addEventListener("load", onIframeReady);
+              setTimeout(onIframeReady, 150);
+              setTimeout(onIframeReady, 500);
+            }
+          }
+        }
         const blockEl = columnsBlock.getContentElement();
         const sectionDom = blockEl && blockEl.getDomElement();
         if (sectionDom && !sectionDom._footerClickBound) {
           sectionDom._footerClickBound = true;
-          sectionDom.addEventListener("click", (e) => {
-            const a = e.target.closest("a[data-href]");
-            if (a) {
-              e.preventDefault();
-              this.fireDataEvent("navigate", { path: a.getAttribute("data-href") });
-            }
-          }, true);
-        }
-        const htmlEl = columnsHtmlWidget.getContentElement && columnsHtmlWidget.getContentElement();
-        if (htmlEl && htmlEl.getDomElement) {
-          const d = htmlEl.getDomElement();
-          if (d) {
-            d.style.overflow = "visible";
-            d.style.minHeight = "0";
-          }
+          sectionDom.addEventListener("click", handleFooterClick, true);
         }
       });
       columnsBlock.add(columnsHtmlWidget);
@@ -200,17 +241,20 @@ qx.Class.define("landing_qooxdoo.components.Footer", {
       othersItems.forEach(o => {
         othersHtml += "<a href=\"#\" data-href=\"" + esc(o.href) + "\" style=\"" + linkStyle + "\">" + esc(o.label) + "</a>";
       });
-      let contactHtml = "<div style=\"" + titleStyle + "\">FOR MORE INFORMATION CONTACT</div>";
-      contactHtml += "<div style=\"" + lineStyle + ";font-weight:bold\">THOMAS C. SADDUL</div>";
-      contactHtml += "<div style=\"" + lineStyle + "\">President / CEO / Chief Architect</div>";
-      contactHtml += "<div style=\"" + lineStyle + "\">✉ digisoftphofficial@gmail.com</div>";
-      contactHtml += "<div style=\"" + lineStyle + "\">📞 Globe: 09278591168 | Smart: 09214524212</div>";
-      contactHtml += "<div style=\"" + lineStyle + "\">📍 Paranaque City, Philippines</div>";
-      contactHtml += "<a href=\"https://www.facebook.com/DigiSoftPH/\" target=\"_blank\" rel=\"noopener\" style=\"" + linkStyle + "\">📘 DigiSoftPH</a>";
+      const lineBlock = "display:block;margin:0 0 6px 0;";
+      let contactHtml = "<div class=\"footer-column-contact\" style=\"flex:0 0 auto;min-width:0;max-width:420px\">";
+      contactHtml += "<div style=\"" + titleStyle + "\">FOR MORE INFORMATION CONTACT</div>";
+      contactHtml += "<div style=\"" + lineStyle + ";font-weight:bold;" + lineBlock + "\">THOMAS C. SADDUL</div>";
+      contactHtml += "<div style=\"" + lineStyle + ";" + lineBlock + "\">President / CEO / Chief Architect</div>";
+      contactHtml += "<a href=\"mailto:digisoftphofficial@gmail.com\" style=\"" + linkStyle + ";" + lineBlock + "\">✉ digisoftphofficial@gmail.com</a>";
+      contactHtml += "<div style=\"" + lineStyle + ";" + lineBlock + ";white-space:nowrap;\">📞 <a href=\"tel:+639278591168\" style=\"" + linkStyle + ";display:inline;\">Globe: 09278591168</a> | <a href=\"tel:+639214524212\" style=\"" + linkStyle + ";display:inline;\">Smart: 09214524212</a></div>";
+      contactHtml += "<div style=\"" + lineStyle + ";" + lineBlock + "\">📍 Paranaque City, Philippines</div>";
+      contactHtml += "<a href=\"https://www.facebook.com/DigiSoftPH/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"" + linkStyle + ";" + lineBlock + "\">📘 DigiSoftPH</a>";
+      contactHtml += "</div>";
       return "<div class=\"footer-columns-html-row\" style=\"" + rowStyle + "\">" +
         "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0\">" + productsHtml + "</div>" +
         "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0\">" + othersHtml + "</div>" +
-        "<div class=\"footer-column\" style=\"flex:0 0 auto;min-width:0;max-width:420px\">" + contactHtml + "</div>" +
+        contactHtml +
         "</div>";
     },
 

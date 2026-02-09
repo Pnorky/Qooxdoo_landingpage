@@ -22,9 +22,12 @@ qx.Class.define("landing_qooxdoo.pages.ListOfClientsPage", {
 
   members: {
     _init() {
-      // Title – custom Label, larger size
-      const title = new landing_qooxdoo.ui.Label("List of Clients");
+      const pageContentEl = this.getContentElement();
+      if (pageContentEl && pageContentEl.addClass) pageContentEl.addClass("list-of-clients-page");
+      const headerBlock = new qx.ui.container.Composite(new qx.ui.layout.VBox(4));
+      const title = new landing_qooxdoo.ui.Label("LIST OF CLIENTS");
       title.setFont("bold");
+      if (title.getContentElement()) title.getContentElement().addClass("clients-page-title");
       title.addListenerOnce("appear", () => {
         const root = title.getContentElement() && title.getContentElement().getDomElement();
         if (root) {
@@ -35,51 +38,58 @@ qx.Class.define("landing_qooxdoo.pages.ListOfClientsPage", {
           }
         }
       });
-      this.add(title);
+      headerBlock.add(title);
+      const subtitle = new landing_qooxdoo.ui.Label("List of clients who have purchased / subscribed to the products.");
+      if (subtitle.getContentElement()) subtitle.getContentElement().addClass("clients-page-subtitle");
+      headerBlock.add(subtitle);
+      this.add(headerBlock);
 
-      // Table container – full width
-      const tableContainer = new qx.ui.container.Composite();
-      tableContainer.setLayout(new qx.ui.layout.VBox());
-      tableContainer.setAllowGrowX(true);
-      this._tableContainer = tableContainer;
-      this.add(tableContainer, { flex: 1 });
+      const accordionContainer = new qx.ui.container.Composite();
+      accordionContainer.setLayout(new qx.ui.layout.VBox());
+      accordionContainer.setAllowGrowX(true);
+      this._accordionContainer = accordionContainer;
+      this._scroll = new qx.ui.container.Scroll();
+      this._scroll.setScrollbarY("auto");
+      this._scroll.setScrollbarX("off");
+      accordionContainer.add(this._scroll, { flex: 1 });
+      this.add(accordionContainer, { flex: 1 });
 
       this._loadClients();
     },
 
     /**
-     * Load clients from Excel and show in custom Table
+     * Load clients from Excel. Row 1 = place names (accordion labels); each column = list of schools for that place.
      */
     _loadClients() {
       landing_qooxdoo.util.ExcelReader.getListOfClients()
-        .then(clients => {
-          if (!clients || clients.length === 0) {
-            const noDataLabel = new qx.ui.basic.Label("No clients found");
-            this._tableContainer.add(noDataLabel);
+        .then((data) => {
+          const places = data.places || [];
+          const schoolLists = data.schoolLists || [];
+          if (places.length === 0) {
+            const noDataLabel = new landing_qooxdoo.ui.Label("No clients found");
+            this._scroll.add(noDataLabel);
             return;
           }
 
-          const firstClient = clients[0];
-          const columns = Object.keys(firstClient);
+          const accordion = new landing_qooxdoo.ui.Accordion();
+          accordion.setAllowGrowX(true);
+          accordion.setAllowGrowY(false);
+          accordion.setRichContent(false);
 
-          const table = new landing_qooxdoo.ui.Table("");
-          table.setAllowGrowX(true);
-          table.setAllowGrowY(true);
-          table.setMinHeight(200);
-
-          table.setHeaders(columns);
-
-          clients.forEach(client => {
-            const rowData = columns.map(col => client[col] != null ? String(client[col]) : "");
-            table.addRow(rowData, null, client);
+          places.forEach((place, i) => {
+            const label = (place != null && String(place).trim() !== "") ? String(place).trim().toUpperCase() : "";
+            if (label === "") return;
+            const schools = schoolLists[i] || [];
+            const bulletLines = schools.map((s) => "• " + s);
+            accordion.addItem(label, bulletLines.join("\n"));
           });
 
-          this._tableContainer.add(table, { flex: 1 });
+          this._scroll.add(accordion);
         })
         .catch(error => {
           console.error("Failed to load clients:", error);
-          const errorLabel = new qx.ui.basic.Label("Error loading clients: " + error.message);
-          this._tableContainer.add(errorLabel);
+          const errorLabel = new landing_qooxdoo.ui.Label("Error loading clients: " + error.message);
+          this._scroll.add(errorLabel);
         });
     }
   }

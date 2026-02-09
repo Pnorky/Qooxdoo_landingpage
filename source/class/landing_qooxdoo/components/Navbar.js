@@ -19,9 +19,7 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
   construct() {
     this.base(arguments);
     this.setMinHeight(64);
-    this.setPaddingBottom(12);
     this.setPadding(0);
-    this.setPaddingBottom(12);
     this.setLayout(new qx.ui.layout.VBox());
     this.setAllowStretchX(true);
     this._products = [];
@@ -33,19 +31,19 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
     _menuBar: null,
     _logoContainer: null,
     _titleLabel: null,
-    // _modeToggle: null,  // Dark mode toggle (commented out temporarily)
+    _modeToggle: null,
+    _productsMenuButton: null,
 
     _init() {
       // Card wrapper (theme from theme.css: --card, --card-foreground, --border, etc.)
       const card = new landing_qooxdoo.ui.Card("", "", false);
       card.setFullWidth(true);
 
-      // Main container - full width, horizontal layout (lives inside card section)
+      // Main container: logo left, menus centered (between spacers), toggle right
       const mainContainer = new qx.ui.container.Composite();
-      mainContainer.setLayout(new qx.ui.layout.HBox(20));
-      mainContainer.setPadding(16, 40, 20, 24);
+      mainContainer.setLayout(new qx.ui.layout.HBox(0));
+      mainContainer.setPadding(16, 200, 20, 200);
 
-      // Logo and title container
       this._logoContainer = new qx.ui.container.Composite();
       this._logoContainer.setLayout(new qx.ui.layout.HBox(12));
       this._logoContainer.setAlignY("middle");
@@ -53,45 +51,54 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
         this.fireDataEvent("navigate", { path: "/" });
       }, this);
 
-      // Logo image
       const logo = new qx.ui.basic.Image("landing_qooxdoo/logo.png");
       logo.setWidth(40);
       logo.setHeight(40);
       logo.setScale(true);
 
-      // Company title (custom Basecoat label) - keep on one line, do not shrink
       this._titleLabel = new landing_qooxdoo.ui.Label("Digital Software Corporation");
       this._titleLabel.setFont("bold");
       this._titleLabel.setAlignY("middle");
-      // Nudge text up so it aligns with the visual center of the circular logo
       this._titleLabel.setMarginTop(-4);
 
       this._logoContainer.add(logo, { flex: 0 });
       this._logoContainer.add(this._titleLabel, { flex: 0 });
+      this._logoContainer.setMarginRight(40);
       mainContainer.add(this._logoContainer, { flex: 0 });
 
-      // Spacer to push menu to the right
-      const spacer = new qx.ui.core.Spacer();
-      mainContainer.add(spacer, { flex: 1 });
+      const leftSpacer = new qx.ui.core.Spacer();
+      mainContainer.add(leftSpacer, { flex: 1 });
 
-      // Menu bar for navigation (styled via landing_qooxdoo.ui.MenuBar)
       this._menuBar = landing_qooxdoo.ui.MenuBar.createStyledMenuBar();
+      this._menuBar.setMarginLeft(24);
+      this._menuBar.setMarginRight(24);
 
-      // Browse Products menu
       const productsMenu = new qx.ui.menubar.Button("Browse Products");
       const productsSubMenu = new qx.ui.menu.Menu();
       productsMenu.setMenu(productsSubMenu);
-
-      // Will be populated when products are loaded
       this._productsSubMenu = productsSubMenu;
+      this._productsMenuButton = productsMenu;
+      const setBrowseProductsOpen = (open) => {
+        const btn = this._productsMenuButton;
+        if (btn && btn.getContentElement()) {
+          const dom = btn.getContentElement().getDomElement();
+          if (dom) {
+            if (open) dom.classList.add("navbar-browse-products-open");
+            else dom.classList.remove("navbar-browse-products-open");
+          }
+        }
+      };
+      productsSubMenu.addListener("changeVisibility", (e) => {
+        setBrowseProductsOpen(!!e.getData());
+      }, this);
+      productsSubMenu.addListener("appear", () => setBrowseProductsOpen(true), this);
+      productsSubMenu.addListener("disappear", () => setBrowseProductsOpen(false), this);
 
-      // Release Notes
       const releaseNotesButton = new qx.ui.menubar.Button("Release Notes");
       releaseNotesButton.addListener("execute", () => {
         this.fireDataEvent("navigate", { path: "/release-notes" });
       }, this);
 
-      // List of Clients
       const clientsButton = new qx.ui.menubar.Button("List of Clients");
       clientsButton.addListener("execute", () => {
         this.fireDataEvent("navigate", { path: "/list-of-clients" });
@@ -103,29 +110,43 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
 
       mainContainer.add(this._menuBar, { flex: 0 });
 
-      // Dark mode toggle (commented out temporarily)
-      // this._modeToggle = new qx.ui.form.ToggleButton();
-      // this._modeToggle.setMarginLeft(16);
-      // this._modeToggle.setMarginRight(20);
-      // this._modeToggle.setToolTipText("Dark mode");
-      // this._modeToggle.addListener("changeValue", (e) => {
-      //   const app = qx.core.Init.getApplication();
-      //   if (app && app.toggleTheme) {
-      //     app.toggleTheme();
-      //   }
-      // }, this);
-      // mainContainer.add(this._modeToggle, { flex: 0 });
+      const rightSpacer = new qx.ui.core.Spacer();
+      mainContainer.add(rightSpacer, { flex: 1 });
+
+      this._modeToggle = new qx.ui.form.Button("☀");
+      this._modeToggle.setToolTipText("Toggle dark mode");
+      this._modeToggle.setMinWidth(40);
+      this._modeToggle.setMinHeight(40);
+      this._modeToggle.setMarginLeft(24);
+      this._modeToggle.addListener("execute", () => {
+        const app = qx.core.Init.getApplication();
+        if (app && app.toggleTheme) {
+          app.toggleTheme();
+          this._updateModeToggleLabel();
+        }
+      }, this);
+      mainContainer.add(this._modeToggle, { flex: 0 });
 
       card.getSection().add(mainContainer);
       this.add(card);
 
       // Ensure navbar doesn't clip - clear overflow on entire chain so company label is not cut
       this.addListenerOnce("appear", () => {
-        // Sync dark mode toggle with current theme (commented out temporarily)
-        // const app = qx.core.Init.getApplication();
-        // if (app && app.isDarkMode) {
-        //   this._modeToggle.setValue(app.isDarkMode());
-        // }
+        this._updateModeToggleLabel();
+        if (this._modeToggle) {
+          const toggleEl = this._modeToggle.getContentElement();
+          if (toggleEl) {
+            const dom = toggleEl.getDomElement();
+            if (dom) dom.classList.add("navbar-dark-mode-toggle");
+          }
+        }
+        if (this._productsMenuButton) {
+          const btnEl = this._productsMenuButton.getContentElement();
+          if (btnEl) {
+            const dom = btnEl.getDomElement();
+            if (dom) dom.classList.add("navbar-browse-products");
+          }
+        }
         const contentEl = this.getContentElement();
         if (contentEl) {
           contentEl.setStyle("overflowX", "visible");
@@ -166,9 +187,22 @@ qx.Class.define("landing_qooxdoo.components.Navbar", {
             titleContentEl.setStyle("overflow", "visible");
             titleContentEl.setStyle("overflowX", "visible");
             titleContentEl.setStyle("overflowY", "visible");
+            const titleDom = titleContentEl.getDomElement();
+            if (titleDom) titleDom.classList.add("navbar-title");
           }
         }
       }, this);
+    },
+
+    /**
+     * Update dark mode toggle label (☀ = switch to light, 🌙 = switch to dark)
+     */
+    _updateModeToggleLabel() {
+      if (!this._modeToggle) return;
+      const app = qx.core.Init.getApplication();
+      const isDark = app && app.isDarkMode && app.isDarkMode();
+      this._modeToggle.setLabel(isDark ? "☀" : "🌙");
+      this._modeToggle.setToolTipText(isDark ? "Switch to light mode" : "Switch to dark mode");
     },
 
     /**

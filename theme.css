@@ -208,7 +208,136 @@ body {
   color: var(--foreground);
 }
 
-/* Navbar card: brand blue #004580, no rounded corners */
+/* Product page brochures: link-style labels (visible text, underline, primary color) */
+.product-brochure-link,
+.product-brochure-link .label,
+.product-brochure-link * {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  cursor: pointer;
+}
+.product-brochure-link:hover,
+.product-brochure-link.qx-state-hovered,
+.product-brochure-link:hover .label,
+.product-brochure-link.qx-state-hovered .label,
+.product-brochure-link:hover *,
+.product-brochure-link.qx-state-hovered * {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+}
+
+/* Product page: ensure background and text use theme (fixes dark mode “missing” content) */
+.product-preview-page,
+.product-preview-page .product-preview-content,
+.product-preview-page .product-preview-content * {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+/* Product page: sidebar border (adapts to light/dark) */
+.product-preview-page .product-preview-sidebar {
+  border-right: 1px solid var(--border) !important;
+}
+/* Restore link/brand colors on product page (--primary inverts in dark mode) */
+.product-preview-page .product-breadcrumb-link,
+.product-preview-page .product-breadcrumb-link .label,
+.product-preview-page .product-breadcrumb-link label,
+.product-preview-page .product-brochure-link,
+.product-preview-page .product-brochure-link .label,
+.product-preview-page .product-brochure-link * {
+  color: var(--primary) !important;
+}
+.product-preview-page .product-brochure-link:hover,
+.product-preview-page .product-brochure-link.qx-state-hovered,
+.product-preview-page .product-brochure-link:hover *,
+.product-preview-page .product-brochure-link.qx-state-hovered * {
+  color: var(--accent) !important;
+}
+.product-preview-page .product-brochure-empty,
+.product-preview-page .product-brochure-empty .label {
+  color: var(--muted-foreground) !important;
+}
+
+/* Product page: scoped so basecoat/@layer cannot override. 16px + breadcrumb link underline */
+.product-preview-page .product-breadcrumb,
+.product-preview-page .product-breadcrumb .label,
+.product-preview-page .product-breadcrumb label,
+.product-preview-page .product-title,
+.product-preview-page .product-title .label,
+.product-preview-page .product-title label,
+.product-preview-page .product-section-title,
+.product-preview-page .product-section-title .label,
+.product-preview-page .product-section-title label {
+  font-size: 16px !important;
+}
+.product-preview-page .product-breadcrumb-link,
+.product-preview-page .product-breadcrumb-link .label,
+.product-preview-page .product-breadcrumb-link label {
+  text-decoration: underline !important;
+  cursor: pointer;
+}
+
+/* Title + description block: no extra margin/padding from basecoat or other CSS */
+.product-preview-page .product-title-description-block {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Download dropdown: fixed width so it doesn't stretch */
+.product-preview-page .product-download-combo-wrap {
+  width: 280px;
+  max-width: 320px;
+}
+
+/* List of Clients: Basecoat accordion with theme colors (light/dark) */
+.clients-accordion-theme,
+.clients-accordion-theme summary,
+.clients-accordion-theme summary h2,
+.clients-accordion-theme section,
+.clients-accordion-theme section * {
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.clients-accordion-theme {
+  padding-right: 16px;
+}
+.clients-accordion-theme details {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+.clients-accordion-theme details:last-child {
+  border-bottom-width: 0;
+}
+.clients-accordion-theme .text-muted-foreground {
+  color: var(--muted-foreground) !important;
+}
+/* Scrollable accordion content when many schools */
+.clients-accordion-theme .accordion-content-body {
+  max-height: min(60vh, 400px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* List of Clients page: use theme background/foreground so dark mode works */
+.list-of-clients-page,
+.list-of-clients-page .qx-scroll-pane,
+.list-of-clients-page .qx-scroll-content {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+/* List of Clients page: title uses theme primary, subtitle uses muted */
+.clients-page-title,
+.clients-page-title .label,
+.clients-page-title label {
+  color: var(--primary) !important;
+}
+.clients-page-subtitle,
+.clients-page-subtitle .label,
+.clients-page-subtitle label {
+  color: var(--muted-foreground) !important;
+  font-size: 0.9375rem !important;
+}
+
+/* Navbar card: use theme primary (brand) color, no rounded corners */
 .navbar-card,
 .navbar-card .header,
 .navbar-card .section,
@@ -216,23 +345,125 @@ body {
   border-radius: 0 !important;
 }
 .navbar-card {
-  background-color: #004580 !important;
-  color: #fff !important;
-  border-color: #004580 !important;
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--primary) !important;
 }
 .navbar-card .label,
 .navbar-card .menubar-theme {
-  color: #fff !important;
+  color: var(--primary-foreground) !important;
+}
+/* Navbar logo title only: one rule so no overlap with .label or other font-size */
+.navbar-card .navbar-title .label {
+  font-size: 16px !important;
+}
+/* Navbar menubar: no white box – transparent on dark blue; white text so it’s visible on dark blue */
+.navbar-card .menubar-theme {
+  background-color: transparent !important;
+  border: none !important;
+  min-width: 0 !important;
+  color: var(--primary-foreground) !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+.navbar-card .menubar-theme * {
+  color: var(--primary-foreground) !important;
+}
+/* Prevent menu labels from being cut off (e.g. “List of Clients”) */
+.navbar-card .menubar-theme,
+.navbar-card .menubar-theme > * {
+  overflow: visible !important;
+  white-space: nowrap !important;
+  min-width: min-content !important;
+}
+/* Reset margins so flex gap alone controls spacing between items */
+.navbar-card .menubar-theme > * {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+/* Navbar menu items: hover and active use theme colors; label always visible (e.g. “Browse Products”) */
+.navbar-card .menubar-theme > *:hover,
+.navbar-card .menubar-theme > *.qx-state-hovered {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-color: color-mix(in oklch, var(--accent) 35%, transparent) !important;
+  color: var(--primary-foreground) !important;
+  border-radius: var(--radius) !important;
+}
+.navbar-card .menubar-theme > *:hover *,
+.navbar-card .menubar-theme > *.qx-state-hovered * {
+  color: var(--primary-foreground) !important;
+}
+.navbar-card .menubar-theme > *:active,
+.navbar-card .menubar-theme > *.qx-state-pressed,
+.navbar-card .menubar-theme > *.qx-state-opened,
+.navbar-card .menubar-theme > [aria-pressed="true"],
+.navbar-card .menubar-theme > [aria-expanded="true"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: color-mix(in oklch, var(--primary) 45%, transparent) !important;
+  color: var(--primary-foreground) !important;
+  border-radius: var(--radius) !important;
+}
+.navbar-card .menubar-theme > *:active *,
+.navbar-card .menubar-theme > *.qx-state-pressed *,
+.navbar-card .menubar-theme > *.qx-state-opened *,
+.navbar-card .menubar-theme > [aria-pressed="true"] *,
+.navbar-card .menubar-theme > [aria-expanded="true"] * {
+  color: var(--primary-foreground) !important;
+}
+/* “Browse Products” button: keep label visible when dropdown is open (framework may use nested DOM) */
+.navbar-card .navbar-browse-products,
+.navbar-card .menubar-theme .navbar-browse-products {
+  background-color: transparent !important;
+  color: var(--primary-foreground) !important;
+}
+.navbar-card .navbar-browse-products *,
+.navbar-card .menubar-theme .navbar-browse-products * {
+  color: var(--primary-foreground) !important;
+}
+.navbar-card .navbar-browse-products[aria-pressed="true"],
+.navbar-card .navbar-browse-products[aria-expanded="true"],
+.navbar-card .menubar-theme .navbar-browse-products[aria-pressed="true"],
+.navbar-card .menubar-theme .navbar-browse-products[aria-expanded="true"] {
+  background-color: color-mix(in oklch, var(--primary) 50%, transparent) !important;
+  color: var(--primary-foreground) !important;
+}
+.navbar-card .navbar-browse-products[aria-pressed="true"] *,
+.navbar-card .navbar-browse-products[aria-expanded="true"] *,
+.navbar-card .menubar-theme .navbar-browse-products[aria-pressed="true"] *,
+.navbar-card .menubar-theme .navbar-browse-products[aria-expanded="true"] * {
+  color: var(--primary-foreground) !important;
+}
+/* When dropdown is open (class toggled from JS): keep “Browse Products” label visible */
+.navbar-card .navbar-browse-products-open,
+.navbar-card .menubar-theme .navbar-browse-products-open {
+  background-color: color-mix(in oklch, var(--primary) 50%, transparent) !important;
+  color: var(--primary-foreground) !important;
+}
+.navbar-card .navbar-browse-products-open *,
+.navbar-card .menubar-theme .navbar-browse-products-open * {
+  color: var(--primary-foreground) !important;
+}
+/* Dark mode toggle button in navbar: white text, transparent background */
+.navbar-card .navbar-dark-mode-toggle {
+  background-color: transparent !important;
+  color: var(--primary-foreground) !important;
+  border: none !important;
+  font-size: 1.25rem !important;
+}
+.navbar-card .navbar-dark-mode-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: color-mix(in oklch, var(--accent) 25%, transparent) !important;
 }
 
-/* Footer card: dark blue #16294A, square corners – compact height, 3 columns in a row */
+/* Footer card: use theme sidebar color, square corners – compact height, 3 columns in a row */
 /* Override Basecoat .card: no gap, no padding-block, children don't grow */
-/* Override Basecoat .card gap/padding so section and footer stack with no extra gap */
 .footer-card {
   display: flex !important;
   flex-direction: column !important;
-  background-color: #16294A !important;
-  color: #fff !important;
+  background-color: var(--sidebar) !important;
+  color: var(--sidebar-foreground) !important;
   border: none !important;
   border-radius: 0;
   padding: 0 !important;
@@ -323,6 +554,29 @@ body {
 .footer-card .footer-column > * {
   text-align: left !important;
 }
+.footer-card .footer-column a,
+.footer-card .footer-column-contact a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+/* Contact column: block layout, no overlap */
+.footer-card .footer-column-contact {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+.footer-card .footer-column-contact > * {
+  text-align: left !important;
+  margin-bottom: 6px !important;
+}
+.footer-card .footer-column-contact > *:last-child {
+  margin-bottom: 0 !important;
+}
 .footer-card .section,
 .footer-card .footer-card-section,
 .footer-card .footer-columns-block {
@@ -392,7 +646,7 @@ body {
   padding: 0 !important;
 }
 .footer-card .label {
-  color: #fff !important;
+  color: var(--sidebar-foreground) !important;
   font-size: 13px !important;
   line-height: 1.2 !important;
   overflow: visible !important;
@@ -400,7 +654,7 @@ body {
   margin: 0 !important;
 }
 .footer-card .footer-column-title .label {
-  color: #FFA500 !important;
+  color: var(--accent) !important;
   font-size: 13px !important;
 }
 /* Contact row: icon and text vertically aligned */

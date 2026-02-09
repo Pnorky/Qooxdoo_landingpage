@@ -143,6 +143,10 @@ qx.Class.define("landing_qooxdoo.Application",
         } else if (path.startsWith("/products/")) {
           const productCode = path.split("/products/")[1];
           newPage = new landing_qooxdoo.pages.ProductPreviewPage(productCode);
+          newPage.addListener("navigate", (e) => {
+            const data = e.getData();
+            this._navigateTo(data.path);
+          }, this);
         } else if (path === "/list-of-clients") {
           newPage = new landing_qooxdoo.pages.ListOfClientsPage();
         } else if (path === "/release-notes") {

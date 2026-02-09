@@ -77,10 +77,21 @@ qx.Class.define("landing_qooxdoo.util.ExcelReader", {
             const sheetsData = {};
             
             for (const sheetName of workbook.SheetNames) {
-              const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
-              const filteredRows = rawRows.filter((row) =>
-                Object.values(row).some((val) => val !== null && val !== "")
-              );
+              const sheet = workbook.Sheets[sheetName];
+              let filteredRows;
+              if (sheetName === "ListOfClients") {
+                const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+                if (raw.length < 1) {
+                  filteredRows = [];
+                } else {
+                  filteredRows = { places: raw[0].map((h) => String(h || "").trim() || ""), rawRows: raw.slice(1) };
+                }
+              } else {
+                const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                filteredRows = rawRows.filter((row) =>
+                  Object.values(row).some((val) => val !== null && val !== "")
+                );
+              }
               sheetsData[sheetName] = filteredRows;
             }
 
@@ -127,14 +138,29 @@ qx.Class.define("landing_qooxdoo.util.ExcelReader", {
     },
 
     /**
-     * Get list of clients from list-of-clients.xlsx
-     * @return {qx.Promise} Promise that resolves with clients array
+     * Get list of clients from list-of-clients.xlsx.
+     * Excel layout: row 1 = place names (accordion labels), each column = schools for that place.
+     * @return {qx.Promise} Promise that resolves with { places: string[], schoolLists: string[][] }
      */
     getListOfClients() {
       const resourceManager = qx.util.ResourceManager.getInstance();
       const excelPath = resourceManager.toUri("landing_qooxdoo/data/list-of-clients.xlsx");
       return this.readExcel(excelPath).then(data => {
-        return data.sheets?.ListOfClients || [];
+        const sheetData = data.sheets?.ListOfClients;
+        if (!sheetData || !sheetData.places) {
+          return { places: [], schoolLists: [] };
+        }
+        const places = sheetData.places;
+        const rawRows = sheetData.rawRows || [];
+        const numCols = places.length;
+        const schoolLists = [];
+        for (let c = 0; c < numCols; c++) {
+          const schools = rawRows
+            .map((row) => (row[c] != null ? String(row[c]).trim() : ""))
+            .filter((s) => s !== "");
+          schoolLists.push(schools);
+        }
+        return { places, schoolLists };
       });
     },
 

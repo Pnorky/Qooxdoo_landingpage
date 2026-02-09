@@ -267,14 +267,15 @@ qx.Class.define("landing_qooxdoo.ui.ComboBox", {
       const buttonRect = this._buttonElement.getBoundingClientRect();
       const top = buttonRect.bottom + window.scrollY + 2;
       const left = buttonRect.left + window.scrollX;
-      const width = buttonRect.width;
-      
+      const minW = buttonRect.width;
+      const maxW = Math.min(480, Math.max(200, window.innerWidth - 40));
+
       // Set position immediately without transitions
       this._popoverElement.style.setProperty("top", `${top}px`, "important");
       this._popoverElement.style.setProperty("left", `${left}px`, "important");
-      this._popoverElement.style.setProperty("width", `${width}px`, "important");
-      this._popoverElement.style.setProperty("min-width", `${width}px`, "important");
-      this._popoverElement.style.setProperty("max-width", `${width}px`, "important");
+      this._popoverElement.style.setProperty("min-width", `${minW}px`, "important");
+      this._popoverElement.style.setProperty("width", "max-content", "important");
+      this._popoverElement.style.setProperty("max-width", `${maxW}px`, "important");
     },
 
     /**
